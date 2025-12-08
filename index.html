@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>串口 WebSocket 控制</title>
+</head>
+<body>
+
+端口: <input id="path" value="COM3">
+波特率: <input id="baud" value="57600"><br><br>
+
+<button onclick="openPort()">打开串口</button>
+<button onclick="closePort()">关闭串口</button>
+<br><br>
+
+<input id="cmd" placeholder="发送内容">
+<button onclick="sendCmd()">发送</button>
+
+<pre id="log"></pre>
+
+<script>
+  const ws = new WebSocket('ws://localhost:9988')
+  const log = document.getElementById('log')
+
+  function logMsg(msg) {
+    log.textContent += msg + '\n'
+  }
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data)
+    if (msg.type === 'data') {
+      logMsg('[串口] ' + msg.data)
+    } else if (msg.type === 'result' && msg.action === 'open') {
+      logMsg(`[${msg.action}] ${msg.msg}`)
+      ws.send(JSON.stringify({action: 'ports'}))
+    } else {
+      logMsg(`[${msg.action}] ${msg.msg}`)
+    }
+  }
+
+  function openPort() {
+    ws.send(JSON.stringify({
+      action: 'open',
+      path: document.getElementById('path').value,
+      baudRate: Number(document.getElementById('baud').value)
+    }))
+
+  }
+
+  function sendCmd() {
+    ws.send(JSON.stringify({
+      action: 'send',
+      data: document.getElementById('cmd').value
+    }))
+  }
+
+  function closePort() {
+    ws.send(JSON.stringify({action: 'close'}))
+  }
+</script>
+
+</body>
+</html>
