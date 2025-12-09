@@ -27,14 +27,14 @@
   }
 
   ws.onmessage = e => {
-    const msg = JSON.parse(e.data)
-    if (msg.type === 'data') {
-      logMsg('[串口] ' + msg.data)
-    } else if (msg.type === 'result' && msg.action === 'open') {
-      logMsg(`[${msg.action}] ${msg.msg}`)
+    const info = JSON.parse(e.data)
+    if (info.type === 'data') {
+      logMsg('[Serial] ' + info.data)
+    } else if (info.type === 'result' && info.action === 'open') {
+      logMsg(`[${info.action}] ${info.msg}`)
       ws.send(JSON.stringify({action: 'ports'}))
     } else {
-      logMsg(`[${msg.action}] ${msg.msg}`)
+      logMsg(`[${info.action}] ${msg.msg}`)
     }
   }
 

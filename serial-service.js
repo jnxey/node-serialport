@@ -8,7 +8,7 @@ class SerialService {
     this.onDataCallback = null;
   }
 
-  // ✅ 动态打开串口
+  // 动态打开串口
   open(path, baudRate = 9600) {
     if (this.isOpen) {
       return { success: false, msg: "Serial is open" };
@@ -29,7 +29,7 @@ class SerialService {
       this.isOpen = true;
       if (this.onDataCallback)
         this.onDataCallback("open-success", {
-          msg: `串口已打开: ${path} @ ${baudRate}`,
+          msg: `Open: ${path} @ ${baudRate}`,
         });
     });
 
@@ -43,21 +43,21 @@ class SerialService {
     this.port.on("close", () => {
       this.isOpen = false;
       if (this.onDataCallback)
-        this.onDataCallback("close", { msg: "串口已关闭" });
+        this.onDataCallback("close", { msg: "Serial Close" });
     });
 
     this.port.open((err) => {
       if (err) {
         if (this.onDataCallback)
           this.onDataCallback("open-error", {
-            msg: "打开串口失败:" + String(err.message),
+            msg: "Serial Error:" + String(err.message),
           });
       }
     });
-    return { success: true, msg: "串口打开中..." };
+    return { success: true, msg: "Serial Opening..." };
   }
 
-  // ✅ 获取可访问的列表
+  // 获取可访问的列表
   async ports() {
     const ports = await SerialPort.list();
     const list = ports.map((p) => ({
@@ -70,28 +70,31 @@ class SerialService {
       this.onDataCallback("ports", tools.getParams(list));
   }
 
-  // ✅ 关闭串口
+  // 关闭串口
   close() {
     if (!this.isOpen || !this.port) {
-      return { success: false, msg: "串口未打开" };
+      return { success: false, msg: "Serial is not open" };
     }
 
     this.port.close();
-    return { success: true, msg: "关闭中" };
+    return { success: true, msg: "Closing" };
   }
 
   // ✅ 发送数据
   send(data) {
     if (!this.isOpen || !this.port)
-      return { success: false, msg: "串口未打开" };
+      return { success: false, msg: "Serial is not open" };
     const buf = tools.hexStringToBuffer(data);
     this.port.write(buf, (err) => {
       if (err) {
         if (this.onDataCallback)
-          this.onDataCallback("send-error", "发送失败:" + String(err.message));
+          this.onDataCallback(
+            "send-error",
+            "Send Error:" + String(err.message),
+          );
       }
     });
-    return { success: true, msg: "发送成功" };
+    return { success: true, msg: "Send Success" };
   }
 
   // ✅ 接收监听
