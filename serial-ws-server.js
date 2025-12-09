@@ -55,7 +55,7 @@ wss.on("connection", (ws) => {
         tools.getParams({ type: "result", action: msg.action, ...result }),
       );
     } catch (e) {
-      ws.send(tools.getParams({ type: "error", msg: e.message }));
+      ws.send(tools.getParams({ type: "error", msg: String(e.message) }));
     }
   });
 
@@ -68,6 +68,6 @@ wss.on("connection", (ws) => {
   // ✅ 监听连接错误
   ws.on("error", (err) => {
     console.error("WS 发生错误", err);
-    ws.send(JSON.stringify({ type: "error", msg: String(err?.message) }));
+    ws.send(tools.getParams({ type: "error", msg: String(err?.message) }));
   });
 });

@@ -4,7 +4,6 @@ const tools = require("./serial-tools");
 class SerialService {
   constructor() {
     this.port = null;
-    this.parser = null;
     this.isOpen = false;
     this.onDataCallback = null;
   }
@@ -12,7 +11,7 @@ class SerialService {
   // ✅ 动态打开串口
   open(path, baudRate = 9600) {
     if (this.isOpen) {
-      return { success: false, msg: "串口已打开，请先关闭" };
+      return { success: false, msg: "Serial is open" };
     }
 
     this.port = new SerialPort({
@@ -22,27 +21,38 @@ class SerialService {
     });
 
     this.port.on("data", (data) => {
-      const dataStr = tools.byteToHex(data);
       if (this.onDataCallback)
-        this.onDataCallback("data", tools.getParams(dataStr));
+        this.onDataCallback("data", tools.getParams(tools.byteToHex(data)));
     });
 
     this.port.on("open", () => {
       this.isOpen = true;
-      console.log(`✅ 串口已打开: ${path} @ ${baudRate}`);
+      if (this.onDataCallback)
+        this.onDataCallback("open-success", {
+          msg: `串口已打开: ${path} @ ${baudRate}`,
+        });
     });
 
     this.port.on("error", (err) => {
-      console.error("❌ 串口错误:", String(err.message));
+      if (this.onDataCallback)
+        this.onDataCallback("error", {
+          msg: String(err.message),
+        });
     });
 
     this.port.on("close", () => {
       this.isOpen = false;
-      console.log("🔌 串口已关闭");
+      if (this.onDataCallback)
+        this.onDataCallback("close", { msg: "串口已关闭" });
     });
 
     this.port.open((err) => {
-      if (err) console.error("❌ 打开串口失败:", String(err.message));
+      if (err) {
+        if (this.onDataCallback)
+          this.onDataCallback("open-error", {
+            msg: "打开串口失败:" + String(err.message),
+          });
+      }
     });
     return { success: true, msg: "串口打开中..." };
   }
@@ -76,7 +86,10 @@ class SerialService {
       return { success: false, msg: "串口未打开" };
     const buf = tools.hexStringToBuffer(data);
     this.port.write(buf, (err) => {
-      if (err) console.error("❌ 发送失败:", String(err.message));
+      if (err) {
+        if (this.onDataCallback)
+          this.onDataCallback("send-error", "发送失败:" + String(err.message));
+      }
     });
     return { success: true, msg: "发送成功" };
   }
