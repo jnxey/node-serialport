@@ -8,4 +8,12 @@ module.exports = {
   getParams: function (value) {
     return JSON.stringify(value);
   },
+  getJSON: function (value, def) {
+    if (!value) return def;
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      return def;
+    }
+  },
 };

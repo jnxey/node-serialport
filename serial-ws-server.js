@@ -30,7 +30,7 @@ wss.on("connection", (ws) => {
   // 接收前端指令
   ws.on("message", (message) => {
     try {
-      const msg = JSON.parse(message);
+      const msg = tools.getJSON(message, {});
       let result;
 
       switch (msg.action) {
@@ -45,10 +45,10 @@ wss.on("connection", (ws) => {
           break;
         case "ports":
           serial.ports();
-          result = { success: false, msg: "Success" };
+          result = { success: true, msg: "Success" };
           break;
         default:
-          result = { success: false, msg: "Unknow" };
+          result = { success: true, msg: "Unknow" };
       }
 
       ws.send(
