@@ -22,7 +22,7 @@ class SerialService {
 
     this.port.on("data", (data) => {
       if (this.onDataCallback)
-        this.onDataCallback("data", tools.getParams(tools.byteToHex(data)));
+        this.onDataCallback("data", tools.byteToHex(data));
     });
 
     this.port.on("open", () => {
@@ -66,8 +66,7 @@ class SerialService {
       manufacturer: p.manufacturer || "",
       serialNumber: p.serialNumber || "",
     }));
-    if (this.onDataCallback)
-      this.onDataCallback("ports", tools.getParams(list));
+    if (this.onDataCallback) this.onDataCallback("ports", list);
   }
 
   // 关闭串口
