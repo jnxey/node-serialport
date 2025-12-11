@@ -1,4 +1,3 @@
-const http = require("http");
 const WebSocket = require("ws");
 const SerialService = require("./serial-service");
 const tools = require("./serial-tools");
@@ -6,20 +5,12 @@ const tools = require("./serial-tools");
 const serial = new SerialService();
 const PORT = 9988;
 
-const server = http.createServer((req, res) => {
-  res.end("WS Serial Server Running");
-});
+const wsServer = new WebSocket.Server(
+  { port: PORT, verifyClient: (info, done) => done(true) },
+  () => console.log(`WebSocket Open: ws://localhost:${PORT}`),
+);
 
-server.listen(PORT, () => {
-  console.log(`WebSocket Open: ws://localhost:${PORT}`);
-});
-
-const wss = new WebSocket.Server({
-  server,
-  verifyClient: (info, done) => done(true),
-});
-
-wss.on("connection", (ws) => {
+wsServer.on("connection", (ws) => {
   console.log("Client Connection");
 
   // 串口数据回调 → 推送给前端
